@@ -119,15 +119,218 @@ public class DominoGame {
                         if(!conditionMet) isGameDraw = true; 
                 }
             }
+                
+
+
                 //Check if any of the domino is playable
                 for(DominoeChip dc: curPlayer.getChips()){
                     if(dc.getLeftChip() == head || dc.getLeftChip() == tail || dc.getRightChip() == head || dc.getRightChip() == tail ){
                         canPlay = true;
                     }
                 }
+
+                if(!canPlay){
+                    if(dominoObj.getDominoes().isEmpty()){
+                        CTable.print(curPlayer, domtrain);
+                        System.out.println(String.format("Head: %s | Tail: %s", head, tail));
+                        System.out.println("No more dominoes to draw from. ");
+                        switchPlayer = true;
+                        canPlay = true;
+                    } else{
+                        // CTable.print(curPlayer, domtrain);
+                        // System.out.println(String.format("Head: %s | Tail: %s", head, tail));
+                        if(isFirstMove) {
+                            canPlay= true;
+                        } 
+                        else{
+
+                            System.out.println("You do not have a playable domino, Select a domino from below to draw");
+                            
+                            for(DominoeChip cp: dominoObj.getDominoes()){
+                                System.out.println(String.format("%s: [?,?]", dominoObj.getDominoes().indexOf(cp)));
+                            }
+
+                            boolean isPlayValid = false;
+                            Integer inputVal = null;
+
+                            System.out.println("Which domino would you like to draw");
+
+                            while(!isPlayValid){
+                                try{
+                                inputVal = myObj.nextInt();
+                                if (inputVal >= 0 && inputVal < dominoObj.getDominoes().size()){
+                                    isPlayValid = true;
+                                } else {
+                                    System.out.println("InputVal is "+inputVal+" dom: "+dominoObj.getDominoes().size());
+                                    System.out.println("Invalid option chosen. Please choose a number from the above displayed choices.");
+                                }
+                                } catch (InputMismatchException m) {
+                                    System.out.println("Invalid number provided as input please re-enter");
+                                }
+                                myObj.nextLine();
+                            }
+
+                            DominoeChip chosenChip = dominoObj.getDominoes().get(inputVal);
+                            System.out.println(String.format("Chosen Domino: [%s, %s]", chosenChip.getLeftChip(), chosenChip.getRightChip()));
+
+                            curPlayer.getChips().add(chosenChip);
+                            dominoObj.getDominoes().remove(chosenChip);
+                        }
+                        
+                    }
+                }
             }
 
-        
+                if(canPlay && !switchPlayer){
+                    boolean isValidChoice = false;
+
+                    while (!isValidChoice)
+                    {
+
+                        try{
+                            Thread.sleep(1000);
+                            } catch (InterruptedException m){
+                                System.out.println(m);
+                            }   
+                        System.out.println(String.format("---Player %s Chance Now---", curPlayer.getId()));
+
+                        CTable.print(curPlayer, domtrain);
+                        // System.out.println(String.format("Head: %s | Tail: %s", head, tail));
+                        boolean isValidPlay = false;
+                        Integer playInp = null;
+
+                        while(!isValidPlay){
+                        System.out.println("Choose a domino to play from your dominoes");
+                        try{
+                        playInp = myObj.nextInt();
+                        if(playInp >= 0 && playInp < curPlayer.getChips().size()){
+                            isValidPlay = true;
+                        } else {
+                            System.out.println("Choose a valid option from above");
+                        }
+                        } catch(InputMismatchException m){
+                            System.out.println("Please provide a valid number as input");
+                        } 
+                        myObj.nextLine();
+                        }  
+                        DominoeChip chosenChip2 = curPlayer.getChips().get(playInp);
+                        System.out.println(String.format("Chosen Domino: [%s, %s]", chosenChip2.getLeftChip(), chosenChip2.getRightChip()));
+
+                        if( (chosenChip2.getLeftChip() == tail && chosenChip2.getLeftChip() == head)
+                         || (chosenChip2.getRightChip() == tail && chosenChip2.getRightChip() == head)
+                         || (chosenChip2.getLeftChip() == head && chosenChip2.getRightChip() == tail)
+                         || (chosenChip2.getLeftChip() == tail && chosenChip2.getRightChip() == head)
+                         ){
+                            boolean validEnd = false;
+                            Integer endSelected = null;
+                            while (!validEnd){
+                                System.out.println("This domino can be played on either end of the train. Choose Head or Tail");
+                                System.out.println("1: Head");
+                                System.out.println("2: Tail");
+                                try{
+                                endSelected = myObj.nextInt();
+                                if(endSelected == 1 || endSelected == 2 ){
+                                    validEnd = true;
+                                } else {
+                                    System.out.println("Invalid option has been chosen");
+                                }
+                                } catch (InputMismatchException m){
+                                    System.out.println("Choose a valid number 1  or 2");
+                                }
+                                myObj.nextLine();
+                            }
+                            if(endSelected == 1){
+                                if (chosenChip2.getLeftChip() == head){
+                                    domtrain.add(0,new DominoeChip(chosenChip2.getRightChip(), chosenChip2.getLeftChip()));
+                                    head = chosenChip2.getRightChip();
+                                    isValidChoice=true;
+                                    curPlayer.getChips().remove(chosenChip2);
+                                } else{
+                                    domtrain.add(0,new DominoeChip(chosenChip2.getLeftChip(), chosenChip2.getRightChip()));
+                                    head = chosenChip2.getLeftChip();
+                                    isValidChoice=true;
+                                    curPlayer.getChips().remove(chosenChip2);
+                                }
+                            } else {
+                                if(chosenChip2.getLeftChip() == tail){
+                                    domtrain.add(new DominoeChip(chosenChip2.getLeftChip(), chosenChip2.getRightChip()));
+                                    tail = chosenChip2.getRightChip();
+                                    isValidChoice=true;
+                                    curPlayer.getChips().remove(chosenChip2);
+
+                                } else {
+                                    domtrain.add(new DominoeChip(chosenChip2.getRightChip(), chosenChip2.getLeftChip()));
+                                    tail = chosenChip2.getLeftChip();
+                                    isValidChoice=true;
+                                    curPlayer.getChips().remove(chosenChip2);
+
+                                }
+                            }
+
+                        } else if (isFirstMove){
+                            domtrain.add(chosenChip2);
+                            head = chosenChip2.getLeftChip();
+                            tail = chosenChip2.getRightChip();
+                            curPlayer.getChips().remove(chosenChip2);
+
+                            isFirstMove = false;
+                            if(curPlayer == player1){
+                                curPlayer = player2;
+                            } else {
+                                curPlayer = player1;
+                            }
+                        } else if (chosenChip2.getLeftChip() == head){
+                            System.out.println("Condition 1 invoked");
+                            domtrain.add(0, new DominoeChip(chosenChip2.getRightChip(), chosenChip2.getLeftChip()));
+                            head = chosenChip2.getRightChip();
+                            isValidChoice = true;
+                            curPlayer.getChips().remove(chosenChip2);
+                        } else if (chosenChip2.getRightChip() == head){
+                            System.out.println("Condition 2 invoked");
+                            domtrain.add(0, chosenChip2);
+                            head = chosenChip2.getLeftChip();
+                            isValidChoice = true;
+                            curPlayer.getChips().remove(chosenChip2);
+                        } else if (chosenChip2.getLeftChip() == tail){
+                            System.out.println("Condition 3 invoked");
+                            domtrain.add(chosenChip2);
+                            tail = chosenChip2.getRightChip();
+                            isValidChoice = true;
+                            curPlayer.getChips().remove(chosenChip2);
+                        } else if (chosenChip2.getRightChip() == tail){
+                            System.out.println("Condition 4 invoked");
+                            domtrain.add( new DominoeChip(chosenChip2.getRightChip(), chosenChip2.getLeftChip()));
+                            tail = chosenChip2.getLeftChip();
+                            isValidChoice = true;
+                            curPlayer.getChips().remove(chosenChip2);
+                        } else {
+                            System.out.println("Invalid domino chose, please rechoose the domino.");
+                        }
+                        
+                     }    
+                }
+
+                if(curPlayer.getChips().size() == 0){
+                    System.out.println(String.format("Player %s has won.", curPlayer.getId()));
+                    if(curPlayer == player1) {
+                        System.out.println("Remaining dominoes for player 2 are: ");
+                        player2.getChips().forEach(x -> {
+                            System.out.println(String.format("[%s ,%s]", x.getLeftChip(), x.getRightChip()));
+                        });
+                    } else {
+                        System.out.println("Remaining dominoes for player 1 are: ");
+                        player1.getChips().forEach(x -> {
+                            System.out.println(String.format("[%s ,%s]", x.getLeftChip(), x.getRightChip()));
+                        });
+                    }
+                    winnerDeclared = true;
+                } else if (isGameDraw) { System.out.println("Game is draw"); winnerDeclared = true;} {
+                    if (curPlayer == player1){
+                        curPlayer = player2;
+                    } else{
+                        curPlayer = player1;
+                    }
+                }
                 
             
         }
